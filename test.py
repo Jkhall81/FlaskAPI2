@@ -17,6 +17,16 @@ def find_book_by_id(book_id):
             return None
 
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({'error': 'Not Found'}), 404
+
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    return jsonify({'error': 'Method Not Allowed'}), 405
+
+
 @app.route('/api/books/<int:id>', methods=['DELETE'])
 def delete_book(id):
     book = find_book_by_id(id)
