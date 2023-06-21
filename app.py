@@ -62,6 +62,11 @@ def slap_a_book(id):
 @app.route('/api/books', methods=['GET', 'POST'])
 def get_books():
     """ This is a function """
+    author = request.args.get('author')
+    if author:
+        filtered_books = [book for book in books if book['author'] == author]
+        return jsonify(filtered_books)
+
     if request.method == 'POST':
         new_book = request.get_json()
 
