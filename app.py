@@ -1,11 +1,31 @@
 from flask import Flask, jsonify, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 
 books = [
     {"id": 1, "title": "The Great Gatsby", "author": "F. Scott Fitzgerald"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
+    {"id": 2, "title": "1984", "author": "George Orwell"},
     {"id": 2, "title": "1984", "author": "George Orwell"}
 ]
+limiter = Limiter(app, key_func=get_remote_address)
 
 
 def find_book_by_id(book_id):
@@ -51,7 +71,7 @@ def slap_a_book(id):
     book = find_book_by_id(id)
 
     if book is None:
-        return 'We couldnt find that fuckin book!', 404
+        return 'We couldn`t find that fuckin book!', 404
 
     new_data = request.get_json()
     book.update(new_data)
@@ -60,9 +80,18 @@ def slap_a_book(id):
 
 
 @app.route('/api/books', methods=['GET', 'POST'])
-def get_books():
-    """ This is a function """
+@limiter.limit('10/minute')
+def slap_books():
+    """ This is a function.  This docstring is not written correctly. """
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 10))
+
+    start_index = (page - 1) * limit
+    end_index = start_index + limit
+
+    paginated_books = books[start_index:end_index]
     author = request.args.get('author')
+
     if author:
         filtered_books = [book for book in books if book['author'] == author]
         return jsonify(filtered_books)
@@ -79,8 +108,7 @@ def get_books():
         books.append(new_book)
 
         return jsonify(new_book), 201
-
-    return jsonify(books)
+    return jsonify(paginated_books)
 
 
 if __name__ == "__main__":
